@@ -1,10 +1,11 @@
 #!/bin/sh
 
-KERNELDIR="/home/michael/android/kernels/shamu/mac_kernel_moto_shamu"
-PACKAGES="/home/michael/android/kernels/shamu/package-shamu"
-TOOLCHAIN="/home/michael/android/toolchains/arm-cortex_a15-linux-gnueabihf-linaro_4.9.3-2015.03/bin"
-CROSSARCH="arm"
-CROSSCC="$CROSSARCH-eabi-"
+KERNELDIR="/home/michael/android/kernels/flounder/mac_kernel_htc_flounder"
+PACKAGES="/home/michael/android/kernels/flounder/package-flounder"
+TOOLCHAIN="/home/michael/android/toolchains/android-toolchain-eabi/bin"
+ZIMAGE="/home/michael/android/kernels/flounder/mac_kernel_htc_flounder/arch/arm64/boot/Image.gz-dtb"
+CROSSARCH="arm64"
+CROSSCC="aarch64-linux-android-"
 USERCCDIR="/home/michael/.ccache"
 DEFCONFIG="mac_defconfig"
 
@@ -48,9 +49,10 @@ compile() {
 	export PATH=$TOOLCHAIN_CCACHE:${PATH}:$TOOLCHAIN
 
 	echo "[BUILD]: Cleaning kernel...";
-	make clean
-	rm $PACKAGES/mac_shamu*.zip
+	make mrproper
+	rm $PACKAGES/mac_flounder*.zip
 	rm $PACKAGES/kernel/zImage
+	rm $ZIMAGE
 
 	echo "[BUILD]: Using defconfig: $DEFCONFIG...";
 	make $DEFCONFIG
@@ -61,18 +63,14 @@ compile() {
 }
 
 kernelzip() {
-	if [ -e $KERNELDIR/arch/arm/boot/zImage ]; then
-		echo "[BUILD]: Copy zImage to Package"
-		cp arch/arm/boot/zImage-dtb $PACKAGES/kernel/zImage
+	echo "[BUILD]: Copy zImage to Package"
+	cp arch/arm64/boot/Image.gz-dtb $PACKAGES/kernel/zImage
 
-		echo "[BUILD]: Make kernel.zip"
-		export curdate=`date "+%m%d%Y"`
-		cd $PACKAGES
-		zip -r mac_shamu_$curdate.zip .
-		cd $KERNELDIR
-	else
-		echo "[BUILD]: KERNEL DID NOT BUILD! no zImage exist"
-	fi;
+	echo "[BUILD]: Make kernel.zip"
+	export curdate=`date "+%m%d%Y"`
+	cd $PACKAGES
+	zip -r mac_flounder_$curdate.zip .
+	cd $KERNELDIR
 }
 
 ccache && compile && kernelzip
